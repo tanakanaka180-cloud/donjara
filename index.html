@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャラ選択型ドンジャラ</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- BGM/設定 コントロール -->
+        <div id="settings-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <span style="font-weight: 700; font-size: 0.8rem; color: var(--primary);">BGM</span>
+                <button id="bgm-toggle-btn" class="btn secondary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">OFF</button>
+            </div>
+            <select id="bgm-track-select" class="btn" style="background: white; border: 1px solid var(--border); color: var(--text-main); font-size: 0.75rem; padding: 0.2rem;">
+                <option value="BGM/BGM (1).mp3">BGM 1</option>
+                <option value="BGM/BGM (2).mp3">BGM 2</option>
+                <option value="BGM/BGM (3).mp3">BGM 3</option>
+                <option value="BGM/BGM (4).mp3">BGM 4</option>
+                <option value="BGM/BGM (5).mp3">BGM 5</option>
+                <option value="BGM/BGM (6).mp3">BGM 6</option>
+            </select>
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 0.65rem;">音量</span>
+                <input type="range" id="bgm-volume" min="0" max="1" step="0.1" value="0.5" style="width: 70px;">
+            </div>
+        </div>
+
+        <!-- タイトル画面 -->
+        <section id="title-screen" class="screen active" style="align-items: center; justify-content: center; background-image: radial-gradient(circle, #FFE082 10%, transparent 11%); background-size: 30px 30px; background-color: var(--bg-main);">
+            <h1 style="font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; color: var(--primary); text-shadow: 4px 4px 0px var(--accent); margin-bottom: 2rem; text-align: center;">DONJARA<br><span style="color: var(--secondary);">BATTLE</span></h1>
+            <button id="title-start-btn" class="btn primary" style="font-size: 1.3rem; padding: 0.8rem 2.5rem;">ゲームスタート</button>
+        </section>
+
+        <!-- キャラクター選択画面 -->
+        <section id="character-selection" class="screen">
+            <header>
+                <h1>DONJARA <span>BATTLE</span></h1>
+                <p>プレイヤーキャラクターを選択してください</p>
+            </header>
+            <div class="character-grid" id="character-grid"></div>
+            <div class="actions">
+                <button id="start-btn" class="btn primary" disabled>決定して開始</button>
+            </div>
+        </section>
+
+        <!-- ゲーム画面 -->
+        <section id="game-screen" class="screen">
+            <header class="game-header">
+                <div class="round-info" id="turn-indicator">ゲーム準備中...</div>
+                <div class="header-actions">
+                    <button class="btn secondary" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;" onclick="document.getElementById('yaku-modal-overlay').style.display='flex'">役一覧</button>
+                    <button id="use-skill-btn" class="btn skill-btn" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">✨ スキル発動</button>
+                    <button id="declare-win-btn" class="btn primary" style="background: linear-gradient(45deg, #ef4444, #b91c1c); display: none; font-size: 0.85rem; padding: 0.4rem 0.8rem;">上がり！</button>
+                </div>
+            </header>
+
+            <main class="mahjong-table-area">
+                <div class="mahjong-table">
+                    <!-- 上（CPU2） -->
+                    <div class="seat seat-top" id="player-2-seat">
+                        <div class="seat-info">
+                            <img src="" alt="CPU2" class="avatar-small" id="cpu2-avatar">
+                            <span id="cpu2-name" class="seat-name">CPU2</span>
+                            <span id="cpu2-status" class="seat-status">待機中</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 左（CPU1） -->
+                    <div class="seat seat-left" id="player-1-seat">
+                        <div class="seat-info">
+                            <img src="" alt="CPU1" class="avatar-small" id="cpu1-avatar">
+                            <span id="cpu1-name" class="seat-name">CPU1</span>
+                            <span id="cpu1-status" class="seat-status">待機中</span>
+                        </div>
+                    </div>
+
+                    <!-- 右（CPU3） -->
+                    <div class="seat seat-right" id="player-3-seat">
+                        <div class="seat-info">
+                            <img src="" alt="CPU3" class="avatar-small" id="cpu3-avatar">
+                            <span id="cpu3-name" class="seat-name">CPU3</span>
+                            <span id="cpu3-status" class="seat-status">待機中</span>
+                        </div>
+                    </div>
+
+                    <!-- 中央（捨て牌） -->
+                    <div class="center-discard-area" id="discard-pile"></div>
+                    
+                    <!-- 下（プレイヤー） -->
+                    <div class="seat seat-bottom" id="player-0-seat">
+                        <div class="seat-info player-self-info">
+                            <img id="player-avatar" src="" alt="You" class="avatar-large">
+                            <div class="self-details">
+                                <span id="player-name" class="seat-name">あなた</span>
+                                <span class="seat-status" id="player-status">待機中</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- プレイヤー手牌 -->
+            <footer class="player-hand-area">
+                <div class="hand-container-wrapper">
+                    <div class="hand-tiles" id="hand-tiles"></div>
+                    <div id="drawn-tile-area" class="drawn-area"></div>
+                </div>
+            </footer>
+        </section>
+        
+        <!-- BGM Player -->
+        <audio id="bgm-player" loop preload="auto">
+            <source src="BGM/BGM (1).mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- モーダル（スキル演出や勝敗） -->
+        <div id="modal-overlay" class="modal-overlay">
+            <div class="modal-content" id="modal-content">
+                <h2 id="modal-title">Title</h2>
+                <p id="modal-text">Message</p>
+                <button id="modal-close" class="btn primary" style="margin-top: 1rem;">閉じる</button>
+<button id="modal-btn-2" class="btn secondary" style="margin-top: 1rem; margin-left: 0.5rem; display: none;">ボタン2</button>
+            </div>
+        </div>
+
+<!-- 役一覧モーダル（画像対応版） -->
+        <div id="yaku-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: white; border-radius: 16px; max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto; text-align: left; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative;">
+                
+                <h2 style="text-align: center; margin-bottom: 20px; color: var(--primary);">🀄 役一覧</h2>
+                
+                <!-- ▼ ここに JavaScript が画像を自動で並べてくれます ▼ -->
+                <div id="yaku-list-container"></div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn primary" style="padding: 10px 40px; font-size: 1.1rem;" onclick="document.getElementById('yaku-modal-overlay').style.display='none'">閉じる</button>
+                </div>
+            </div>
+        </div>
+
+    <script src="js/skills.js"></script>
+    <script src="js/characters.js"></script>
+    <script src="js/tiles.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

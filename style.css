@@ -1,0 +1,507 @@
+:root {
+    /* POPで明るいカラーパレット */
+    --bg-main: #FFF8E7;
+    --bg-card: #FFFFFF;
+    --primary: #FF4785;
+    --primary-hover: #E0356E;
+    --secondary: #00C4CC;
+    --accent: #FFC107;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --border: #FFE082;
+    --border-dark: #FFB300;
+    --tile-bg: #FFFFFF;
+    --tile-color: #333333;
+    --shadow-color: rgba(255, 71, 133, 0.2);
+    
+    /* テーブル用 */
+    --table-bg: #a8d5ba;
+    --table-border: #7db895;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow: hidden;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 画面切り替え */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* --- BGM設定パネル（被り防止調整） --- */
+#settings-panel {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+    transition: transform 0.3s ease;
+}
+
+/* --- キャラクター選択画面 --- */
+#character-selection header {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+
+#character-selection h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+    text-shadow: 3px 3px 0px var(--accent);
+}
+
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.char-card {
+    background-color: var(--bg-card);
+    border: 4px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    box-shadow: 0 4px 0 var(--border-dark);
+}
+
+.char-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 0 var(--border-dark);
+}
+
+.char-card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 8px 0 var(--primary), 0 0 20px var(--shadow-color);
+    background-color: #FFF0F5;
+}
+
+.char-card .char-image {
+    width: 90px;
+    height: 90px;
+    border: 3px solid #FFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: block;
+    object-fit: cover;
+    background-color: var(--secondary);
+}
+
+.char-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.char-card .skill-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.actions {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-top: 2px solid var(--border);
+}
+
+/* --- ボタン --- */
+.btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 900;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+.btn.primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn.primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+
+.btn.secondary {
+    background-color: var(--accent);
+    color: var(--text-main);
+}
+
+.btn.secondary:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.btn.skill-btn {
+    background: linear-gradient(45deg, #FFC107, #FF9800);
+    color: white;
+    font-size: 0.95rem;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
+}
+
+/* --- ゲーム画面レイアウト --- */
+#game-screen {
+    display: none;
+    flex-direction: column;
+    background-color: #f0f4f8;
+    height: 100vh;
+}
+
+#game-screen.active {
+    display: flex;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 1rem;
+    background-color: var(--bg-card);
+    border-bottom: 3px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    z-index: 20;
+}
+
+.round-info {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 1px 1px 0px rgba(255,193,7,0.5);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* --- 麻雀テーブル --- */
+.mahjong-table-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.mahjong-table {
+    width: 100%;
+    max-width: 780px;
+    height: 100%;
+    max-height: 580px;
+    aspect-ratio: 4 / 3;
+    background: radial-gradient(circle, var(--table-bg) 55%, var(--table-border) 100%);
+    border-radius: 24px;
+    position: relative;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.12), 0 10px 30px rgba(0,0,0,0.15);
+    border: 6px solid #fff;
+}
+
+/* 席の共通スタイル */
+.seat {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.seat-info {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.4rem 0.6rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    border: 3px solid var(--secondary);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.seat-info.active-turn {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px var(--primary);
+    transform: scale(1.08);
+}
+
+/* ★ キャラクター画像を大きく表示 ★ */
+.avatar-small {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFF;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: var(--secondary);
+}
+
+.avatar-large {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFF;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    background-color: var(--primary);
+}
+
+.seat-name {
+    font-weight: 900;
+    font-size: 0.8rem;
+    color: var(--text-main);
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.seat-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+/* 各座席の配置（四隅・端に寄せて中央を広く確保） */
+.seat-top { top: 6px; left: 50%; transform: translateX(-50%); }
+.seat-left { left: 8px; top: 48%; transform: translateY(-50%); }
+.seat-right { right: 8px; top: 48%; transform: translateY(-50%); }
+.seat-bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+
+.player-self-info {
+    flex-direction: row;
+    padding: 0.4rem 1rem;
+    gap: 12px;
+    border-color: var(--primary);
+}
+
+.self-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* --- 捨て牌エリア（中央：キャラと被らないようにサイズ調整） --- */
+.center-discard-area {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52%;
+    height: 48%;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 16px;
+    border: 2px dashed rgba(0,0,0,0.15);
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    justify-content: flex-start;
+    padding: 6px;
+    gap: 4px;
+    overflow-y: auto;
+    z-index: 1;
+}
+
+.discard-tile-mini {
+    width: 26px;
+    height: 36px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* --- プレイヤー手牌エリア --- */
+.player-hand-area {
+    background-color: var(--bg-card);
+    padding: 0.6rem 1rem;
+    border-top: 3px solid var(--border);
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+    z-index: 15;
+}
+
+.hand-container-wrapper {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.hand-tiles {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.drawn-area {
+    width: clamp(45px, 8vw, 60px);
+    height: clamp(65px, 12vw, 90px);
+    border-left: 2px dashed #ccc;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tile {
+    width: clamp(36px, 7vw, 54px);
+    height: clamp(56px, 11vw, 84px);
+    background-color: var(--tile-bg);
+    border: 2px solid #E0E0E0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tile-color);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    padding: 0;
+}
+
+.tile.playable {
+    cursor: pointer;
+    border-color: var(--primary);
+}
+
+.tile.playable:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 15px rgba(255, 71, 133, 0.3);
+}
+
+/* --- モーダル --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    padding: 1.8rem;
+    border-radius: 20px;
+    text-align: center;
+    border: 4px solid var(--primary);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 90%;
+    width: 360px;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h2 {
+    color: var(--primary);
+    margin-bottom: 0.8rem;
+    font-size: 1.4rem;
+}
+
+@media (min-width: 768px) {
+    .char-card .char-image {
+        width: 105px; height: 105px;
+    }
+    .avatar-small {
+        width: 80px; height: 80px;
+    }
+    .avatar-large {
+        width: 100px; height: 100px;
+    }
+    .seat-name {
+        font-size: 0.9rem;
+        max-width: 110px;
+    }
+    .discard-tile-mini {
+        width: 28px; height: 38px; font-size: 0.6rem;
+    }
+}
